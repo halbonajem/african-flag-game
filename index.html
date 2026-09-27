@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#15183a" />
+<title>African Flag Challenge</title>
+<style>
+  :root{
+    --bg-1:#0f1230;
+    --bg-2:#202b68;
+    --card:#ffffff;
+    --ink:#14162d;
+    --muted:#667085;
+    --purple:#6d5dfc;
+    --purple-dark:#5144db;
+    --gold:#ffca4b;
+    --green:#19b56b;
+    --green-dark:#0e8e50;
+    --red:#ef4d5b;
+    --red-dark:#c92f3e;
+    --line:#e8eaf2;
+    --shadow:0 24px 70px rgba(5,8,30,.28);
+  }
+
+  *{box-sizing:border-box}
+  html,body{min-height:100%;margin:0}
+  body{
+    font-family:Inter, ui-rounded, "SF Pro Rounded", "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color:#fff;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(126,104,255,.35), transparent 32%),
+      radial-gradient(circle at 88% 8%, rgba(255,202,75,.19), transparent 27%),
+      linear-gradient(155deg,var(--bg-1),var(--bg-2));
+    overflow-x:hidden;
+  }
+
+  body::before, body::after{
+    content:"";
+    position:fixed;
+    pointer-events:none;
+    border-radius:50%;
+    filter:blur(2px);
+    opacity:.2;
+    z-index:0;
+  }
+  body::before{width:260px;height:260px;background:#7d6aff;right:-100px;bottom:12vh}
+  body::after{width:180px;height:180px;background:#ffca4b;left:-80px;top:15vh}
+
+  button{font:inherit}
+  .app{
+    min-height:100vh;
+    min-height:100dvh;
+    display:grid;
+    place-items:center;
+    padding:max(18px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+    position:relative;
+    z-index:1;
+  }
+
+  .game-card{
+    width:min(760px,100%);
+    background:rgba(255,255,255,.98);
+    color:var(--ink);
+    border:1px solid rgba(255,255,255,.5);
+    border-radius:30px;
+    box-shadow:var(--shadow);
+    padding:clamp(20px,4vw,38px);
+    position:relative;
+    overflow:hidden;
+    min-height:min(720px,calc(100dvh - 36px));
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+
+  .screen{display:none;opacity:0;transform:translateY(8px)}
+  .screen.active{display:block;animation:screenIn .35s cubic-bezier(.2,.8,.2,1) forwards}
+  @keyframes screenIn{to{opacity:1;transform:none}}
+
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-size:.78rem;
+    font-weight:850;
+    color:var(--purple);
+    text-align:center;
+    margin-bottom:8px;
+  }
+  h1,h2,p{margin-top:0}
+  h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.02;margin-bottom:12px;text-align:center;letter-spacing:-.04em}
+  h2{font-size:clamp(1.75rem,4vw,2.7rem);line-height:1.08;margin-bottom:10px;text-align:center;letter-spacing:-.03em}
+  .subtitle{max-width:580px;margin:0 auto 24px;color:var(--muted);text-align:center;line-height:1.55;font-size:1rem}
+
+  .progress-wrap{margin:0 auto 22px;max-width:560px}
+  .progress-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;color:#70758a;font-size:.88rem;font-weight:750}
+  .progress-track{height:9px;background:#eceef6;border-radius:99px;overflow:hidden}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--purple),#9c75ff);border-radius:inherit;transition:width .35s ease}
+
+  .flag-stage{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:clamp(220px,42vw,360px);
+    margin:4px auto 18px;
+    transition:opacity .16s ease, transform .16s ease;
+  }
+  .flag-stage.swapping{opacity:0;transform:translateX(-8px) scale(.99)}
+  .flag-frame{
+    width:min(580px,94%);
+    display:grid;
+    place-items:center;
+    filter:drop-shadow(0 15px 20px rgba(8,12,35,.20));
+  }
+  .flag-frame svg{
+    display:block;
+    width:100%;
+    max-height:330px;
+    height:auto;
+    border-radius:8px;
+    box-shadow:0 0 0 1px rgba(15,18,48,.10);
+    background:#fff;
+  }
+  .country-name{
+    font-size:clamp(1.45rem,4vw,2.15rem);
+    font-weight:900;
+    letter-spacing:-.025em;
+    text-align:center;
+    margin:0 0 20px;
+  }
+
+  .primary-btn{
+    border:0;
+    border-radius:16px;
+    padding:16px 22px;
+    min-height:56px;
+    background:linear-gradient(135deg,var(--purple),var(--purple-dark));
+    color:#fff;
+    font-weight:900;
+    letter-spacing:.02em;
+    cursor:pointer;
+    box-shadow:0 10px 26px rgba(84,69,220,.28);
+    transition:transform .12s ease,box-shadow .12s ease,filter .12s ease;
+    width:min(330px,100%);
+    display:block;
+    margin:0 auto;
+  }
+  .primary-btn:hover{filter:brightness(1.05);box-shadow:0 13px 30px rgba(84,69,220,.34)}
+  .primary-btn:active{transform:translateY(2px) scale(.99)}
+  .primary-btn:focus-visible,.answer-btn:focus-visible{outline:4px solid rgba(109,93,252,.28);outline-offset:3px}
+
+  .transition-icon{font-size:4.2rem;text-align:center;margin-bottom:14px;animation:floaty 2.2s ease-in-out infinite}
+  @keyframes floaty{50%{transform:translateY(-8px) rotate(2deg)}}
+  .rules{
+    max-width:560px;
+    margin:22px auto 26px;
+    background:#f7f7fd;
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:17px 18px;
+    color:#50566d;
+    line-height:1.5;
+    font-size:.93rem;
+  }
+  .rules strong{color:var(--ink)}
+
+  .quiz-top{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+    gap:10px;
+    margin-bottom:13px;
+  }
+  .stat-chip{
+    border:1px solid var(--line);
+    background:#f8f8fc;
+    border-radius:14px;
+    padding:10px 12px;
+    min-width:0;
+  }
+  .stat-chip.right{text-align:right}
+  .stat-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:#7b8094;font-weight:850;display:block;margin-bottom:2px}
+  .stat-value{font-weight:950;font-size:1.04rem;white-space:nowrap}
+  .q-number{font-weight:950;color:var(--purple);font-size:1rem;text-align:center;white-space:nowrap}
+
+  .quiz-flag-stage{min-height:clamp(190px,34vw,280px);margin:2px auto 12px}
+  .quiz-flag-stage .flag-frame{width:min(480px,86%)}
+
+  .answers{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:11px;
+    margin-top:8px;
+  }
+  .answer-btn{
+    border:2px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    border-radius:16px;
+    padding:15px 14px;
+    min-height:68px;
+    font-weight:850;
+    font-size:clamp(.96rem,2.6vw,1.08rem);
+    line-height:1.24;
+    cursor:pointer;
+    transition:transform .1s ease,border-color .12s ease,background .12s ease,box-shadow .12s ease;
+    text-align:center;
+  }
+  .answer-btn:hover:not(:disabled){border-color:#b8b0ff;background:#faf9ff;transform:translateY(-1px);box-shadow:0 8px 18px rgba(40,37,100,.07)}
+  .answer-btn:active:not(:disabled){transform:translateY(1px)}
+  .answer-btn:disabled{cursor:default}
+  .answer-btn.correct-choice{background:#e9fbf2;border-color:#35bd79;color:#087342}
+  .answer-btn.wrong-choice{background:#fff0f1;border-color:#ef5966;color:#a91e2c}
+
+  .feedback-panel{
+    min-height:56px;
+    margin-top:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-weight:950;
+    font-size:1.12rem;
+    opacity:0;
+    transform:translateY(5px);
+  }
+  .feedback-panel.show{animation:feedbackIn .22s ease forwards}
+  @keyframes feedbackIn{to{opacity:1;transform:none}}
+  .feedback-panel.good{color:var(--green-dark)}
+  .feedback-panel.bad{color:var(--red-dark)}
+  .feedback-panel{flex-direction:column}
+  .feedback-sub{display:block;font-size:.86rem;font-weight:800;margin-top:3px;color:#60667b}
+  .encouragement{display:block;margin-top:9px;font-size:.78rem;line-height:1.38;font-weight:750;color:#72778a;font-style:italic;max-width:560px}
+
+  .responsive-feedback{
+    width:min(560px,100%);
+    margin-top:12px;
+    padding:13px 14px;
+    border-radius:16px;
+    text-align:left;
+    font-size:.86rem;
+    line-height:1.42;
+    font-weight:720;
+  }
+  .responsive-feedback.good{background:#ecfbf4;border:1px solid #b9ecd2;color:#17643e}
+  .responsive-feedback.bad{background:#fff7ed;border:1px solid #fed7aa;color:#7c3f10}
+  .feedback-learning-title{
+    display:flex;align-items:center;gap:7px;
+    font-size:.78rem;text-transform:uppercase;letter-spacing:.075em;
+    font-weight:950;margin-bottom:7px;
+  }
+  .feedback-learning-row{display:grid;grid-template-columns:118px 1fr;gap:9px;align-items:start}
+  .feedback-learning-row + .feedback-learning-row{margin-top:8px;padding-top:8px;border-top:1px solid rgba(20,22,45,.09)}
+  .feedback-learning-label{font-weight:950;color:#3f4559}
+  .feedback-learning-text{color:#565c6f;font-weight:760}
+  .responsive-feedback.good .feedback-learning-text{color:#27634a}
+  .responsive-feedback.bad .feedback-learning-text{color:#71451f}
+
+  @media (max-width:520px){
+    .feedback-learning-row{grid-template-columns:1fr;gap:2px}
+  }
+
+  .meme-card{
+    width:min(390px,100%);
+    margin-top:12px;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 10px 28px rgba(22,27,62,.14);
+    border:1px solid rgba(20,22,45,.08);
+    background:#fff;
+    color:#17182b;
+    transform:scale(.96) translateY(5px);
+    opacity:0;
+    animation:memePop .34s cubic-bezier(.2,.9,.25,1.15) .05s forwards;
+  }
+  @keyframes memePop{to{transform:none;opacity:1}}
+  .meme-visual{
+    min-height:118px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .meme-card.good-meme .meme-visual{background:linear-gradient(135deg,#d9ffe9,#aef3cf 46%,#e8fff1)}
+  .meme-card.bad-meme .meme-visual{background:linear-gradient(135deg,#fff0f2,#ffe6d9 48%,#fff7e7)}
+  .meme-visual::before,.meme-visual::after{
+    content:"";
+    position:absolute;
+    width:110px;height:110px;border-radius:50%;
+    opacity:.34;filter:blur(1px);z-index:-1;
+  }
+  .meme-visual::before{left:-34px;top:-38px;background:#fff}
+  .meme-visual::after{right:-32px;bottom:-44px;background:#fff}
+  .meme-emoji{
+    font-size:clamp(3.7rem,12vw,5.6rem);
+    line-height:1;
+    filter:drop-shadow(0 8px 9px rgba(20,22,45,.14));
+    animation:memeWiggle 1.8s ease-in-out infinite;
+  }
+  @keyframes memeWiggle{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(2deg) translateY(-4px)}}
+  .meme-spark{font-size:clamp(1.8rem,6vw,2.7rem);animation:memeSpark 1.2s ease-in-out infinite alternate}
+  @keyframes memeSpark{to{transform:scale(1.15) rotate(8deg)}}
+  .meme-copy{padding:9px 12px 11px;text-align:center;background:#fff}
+  .meme-headline{display:block;font-weight:1000;font-size:.92rem;letter-spacing:.035em;line-height:1.15}
+  .meme-subline{display:block;margin-top:3px;color:#6b7084;font-size:.75rem;font-weight:800;line-height:1.25}
+
+  .feedback-next{
+    margin-top:10px;
+    width:min(300px,100%);
+  }
+  .feedback-next[hidden]{display:none}
+
+  .game-card.correct-flash{animation:correctFlash .62s ease}
+  .game-card.wrong-flash{animation:wrongFlash .72s ease}
+  @keyframes correctFlash{
+    0%,100%{box-shadow:var(--shadow);background:#fff}
+    24%{box-shadow:0 0 0 8px rgba(25,181,107,.18),0 24px 70px rgba(5,8,30,.28);background:#eafff4}
+  }
+  @keyframes wrongFlash{
+    0%,100%{box-shadow:var(--shadow);background:#fff}
+    25%{box-shadow:0 0 0 8px rgba(239,77,91,.15),0 24px 70px rgba(5,8,30,.28);background:#fff0f1}
+  }
+
+  .celebration-overlay{
+    position:absolute;
+    inset:0;
+    z-index:18;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .spark{
+    position:absolute;
+    left:50%;
+    top:44%;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#21c978;
+    box-shadow:0 0 12px rgba(33,201,120,.65);
+    opacity:0;
+    transform:translate(-50%,-50%);
+    animation:greenBurst var(--dur,.78s) cubic-bezier(.12,.7,.2,1) forwards;
+  }
+  .spark.line{width:5px;height:20px;border-radius:5px}
+  @keyframes greenBurst{
+    0%{opacity:0;transform:translate(-50%,-50%) translate(0,0) scale(.35) rotate(0deg)}
+    12%{opacity:1}
+    70%{opacity:1}
+    100%{opacity:0;transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(var(--scale,1)) rotate(var(--rot,160deg))}
+  }
+
+  .streak-overlay{
+    position:absolute;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .streak-overlay.show{display:flex}
+  .streak-banner{
+    position:relative;
+    z-index:3;
+    font-weight:1000;
+    font-size:clamp(2rem,7vw,4rem);
+    letter-spacing:-.04em;
+    color:#fff;
+    text-shadow:0 4px 0 #c93d14,0 8px 22px rgba(77,20,0,.35);
+    background:linear-gradient(135deg,#ff7849,#ffb21c);
+    border:5px solid #fff0be;
+    border-radius:24px;
+    padding:18px 24px;
+    transform:scale(.4) rotate(-5deg);
+    animation:streakPop .95s cubic-bezier(.16,.85,.25,1.25) forwards;
+    box-shadow:0 18px 60px rgba(215,78,0,.35);
+    text-align:center;
+  }
+  .streak-banner small{display:block;font-size:.34em;letter-spacing:.12em;margin-top:3px}
+  @keyframes streakPop{
+    0%{opacity:0;transform:scale(.4) rotate(-6deg)}
+    35%{opacity:1;transform:scale(1.08) rotate(2deg)}
+    55%{transform:scale(.98) rotate(-1deg)}
+    100%{opacity:0;transform:scale(1.02) rotate(0)}
+  }
+  .flame{
+    position:absolute;
+    bottom:-20px;
+    font-size:clamp(1.2rem,4vw,2.3rem);
+    animation:flameRise .9s ease-out forwards;
+    opacity:0;
+  }
+  @keyframes flameRise{
+    0%{opacity:0;transform:translateY(0) scale(.6) rotate(0)}
+    18%{opacity:1}
+    100%{opacity:0;transform:translateY(-430px) scale(1.5) rotate(18deg)}
+  }
+
+  .results-wrap{text-align:center}
+  .trophy{font-size:4.3rem;margin-bottom:6px;animation:floaty 2.4s ease-in-out infinite}
+  .competition-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0 18px}
+  .competition-card{
+    border-radius:22px;
+    padding:22px 14px;
+    background:linear-gradient(145deg,#f7f5ff,#eeebff);
+    border:1px solid #ded9ff;
+  }
+  .competition-card.fire{background:linear-gradient(145deg,#fff8ec,#fff0d1);border-color:#ffd789}
+  .competition-icon{font-size:2rem;margin-bottom:8px}
+  .competition-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:900;color:#686d82}
+  .competition-value{font-size:clamp(2.2rem,7vw,3.7rem);font-weight:1000;letter-spacing:-.05em;line-height:1.05;margin-top:5px;color:#2c2866}
+  .competition-card.fire .competition-value{color:#9c4f00}
+
+  .detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 0 18px;text-align:left}
+  .detail-card{border:1px solid var(--line);background:#fafafe;border-radius:15px;padding:14px}
+  .detail-card span{display:block;color:#777d90;font-size:.76rem;font-weight:800;margin-bottom:3px}
+  .detail-card strong{font-size:1.24rem}
+
+  .prize-note{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin:16px 0 24px;
+  }
+  .prize-pill{border-radius:14px;background:#171b3f;color:#fff;padding:12px 10px;font-weight:850;font-size:.9rem}
+  .prize-pill:nth-child(2){background:#6e3d13}
+
+  .footer-note{text-align:center;color:#82879a;font-size:.78rem;margin-top:14px}
+
+  @media (max-width:620px){
+    .game-card{border-radius:24px;min-height:calc(100dvh - 24px);padding:20px 16px}
+    .answers{grid-template-columns:1fr;gap:9px}
+    .answer-btn{min-height:58px;padding:13px 12px}
+    .quiz-top{grid-template-columns:1fr 70px 1fr}
+    .stat-chip{padding:8px 9px}
+    .stat-value{font-size:.93rem}
+    .competition-stats{grid-template-columns:1fr}
+    .detail-grid{grid-template-columns:1fr 1fr}
+    .prize-note{grid-template-columns:1fr}
+    .flag-stage{min-height:210px}
+    .quiz-flag-stage{min-height:180px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="game-card" id="gameCard">
+    <section class="screen active" id="learnScreen" aria-label="Flag learning phase">
+      <div class="eyebrow">Phase 1 · Learn</div>
+      <h1>Meet the Flags</h1>
+      <p class="subtitle">Study each flag and its country name. You’ll see all 15 once before the quiz begins.</p>
+      <div class="progress-wrap">
+        <div class="progress-row"><span id="learnProgressText">Flag 1 of 15</span><span>Learning round</span></div>
+        <div class="progress-track"><div class="progress-bar" id="learnProgressBar" style="width:6.6667%"></div></div>
+      </div>
+      <div class="flag-stage" id="learnFlagStage">
+        <div class="flag-frame" id="learnFlag"></div>
+      </div>
+      <div class="country-name" id="learnCountry"></div>
+      <button class="primary-btn" id="nextFlagBtn" type="button">Next Flag →</button>
+    </section>
+
+    <section class="screen" id="transitionScreen" aria-label="Ready for quiz">
+      <div class="transition-icon">🧠✨</div>
+      <div class="eyebrow">Learning complete</div>
+      <h2>You’ve seen all 15 flags.</h2>
+      <p class="subtitle">Now let’s see how many you remember — and how quickly you can recall them.</p>
+      <div class="rules">
+        <strong>Competition scoring:</strong> every correct answer earns 350–1000 points. The first 0.75 seconds are a full-score grace window. After that, points fall on a progressive curve: the early drop is tiny, the middle becomes more meaningful, and the later drop tapers so a correct answer is still worth substantial points. Incorrect answers earn 0.<br><br>
+        <strong>Hot streak:</strong> 3+ correct answers in a row triggers 🔥 HOT STREAK. Streaks do not add score.
+      </div>
+      <button class="primary-btn" id="startQuizBtn" type="button">START QUIZ</button>
+    </section>
+
+    <section class="screen" id="quizScreen" aria-label="Flag quiz">
+      <div class="quiz-top">
+        <div class="stat-chip">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="scoreValue">0</span>
+        </div>
+        <div class="q-number" id="questionNumber">1 / 15</div>
+        <div class="stat-chip right">
+          <span class="stat-label">Streak</span>
+          <span class="stat-value" id="streakValue">0 🔥</span>
+        </div>
+      </div>
+      <div class="flag-stage quiz-flag-stage" id="quizFlagStage">
+        <div class="flag-frame" id="quizFlag"></div>
+      </div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback-panel" id="feedback" aria-live="polite"></div>
+      <button class="primary-btn feedback-next" id="nextQuestionBtn" type="button" hidden>Next Question →</button>
+    </section>
+
+    <section class="screen" id="resultsScreen" aria-label="Final results">
+      <div class="results-wrap">
+        <div class="trophy">🏁</div>
+        <div class="eyebrow">Challenge complete</div>
+        <h2>Your Final Results</h2>
+        <p class="subtitle">Keep this screen open and show the presenter for manual comparison.</p>
+
+        <div class="competition-stats">
+          <div class="competition-card">
+            <div class="competition-icon">🏆</div>
+            <div class="competition-label">Total Score</div>
+            <div class="competition-value" id="finalScore">0</div>
+          </div>
+          <div class="competition-card fire">
+            <div class="competition-icon">🔥</div>
+            <div class="competition-label">Longest Hot Streak</div>
+            <div class="competition-value" id="finalLongest">0</div>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-card"><span>Correct answers</span><strong id="finalCorrect">0 / 15</strong></div>
+          <div class="detail-card"><span>Accuracy</span><strong id="finalAccuracy">0%</strong></div>
+          <div class="detail-card"><span>Average response time</span><strong id="finalAverage">—</strong></div>
+          <div class="detail-card"><span>Fastest correct response</span><strong id="finalFastest">—</strong></div>
+        </div>
+
+        <div class="prize-note">
+          <div class="prize-pill">Highest Total Score Prize 🏆</div>
+          <div class="prize-pill">Longest Hot Streak Prize 🔥</div>
+        </div>
+
+        <button class="primary-btn" id="playAgainBtn" type="button">Play Again</button>
+        <div class="footer-note">Play Again fully resets the learning round, score, timers, streaks, question order and answer order.</div>
+      </div>
+    </section>
+
+    <div class="celebration-overlay" id="celebrationOverlay" aria-hidden="true"></div>
+    <div class="streak-overlay" id="streakOverlay" aria-hidden="true"></div>
+  </main>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const FLAGS = [
+    {
+      name:'Benin',
+      svg:`<svg viewBox="0 0 900 600" role="img" aria-label="Flag of Benin"><rect width="900" height="600" fill="#fcd116"/><rect y="300" width="900" height="300" fill="#e8112d"/><rect width="360" height="600" fill="#008751"/></svg>`
+    },
+    {
+      name:'Burkina Faso',
+      svg:`<svg viewBox="0 0 900 600" role="img" aria-label="Flag of Burkina Faso"><rect width="900" height="300" fill="#ef2b2d"/><rect y="300" width="900" height="300" fill="#009e49"/><polygon fill="#fcd116" points="450,190 476,270 560,270 492,319 518,399 450,350 382,399 408,319 340,270 424,270"/></svg>`
+    },
+    {
+      name:'Burundi',
+      svg:`<svg viewBox="0 0 1000 600" role="img" aria-label="Flag of Burundi"><rect width="1000" height="600" fill="#fff"/><polygon points="0,0 1000,0 575,255 425,255" fill="#ce1126"/><polygon points="0,600 1000,600 575,345 425,345" fill="#ce1126"/><polygon points="0,0 425,255 425,345 0,600" fill="#1eb53a"/><polygon points="1000,0 575,255 575,345 1000,600" fill="#1eb53a"/><g stroke="#fff" stroke-width="70" stroke-linecap="butt"><line x1="0" y1="0" x2="1000" y2="600"/><line x1="1000" y1="0" x2="0" y2="600"/></g><circle cx="500" cy="300" r="112" fill="#fff"/><g fill="#ce1126" stroke="#1eb53a" stroke-width="4" stroke-linejoin="round"><polygon transform="translate(500 244)" points="0,-24 5,-9 21,-12 10,0 21,12 5,9 0,24 -5,9 -21,12 -10,0 -21,-12 -5,-9"/><polygon transform="translate(448 338)" points="0,-24 5,-9 21,-12 10,0 21,12 5,9 0,24 -5,9 -21,12 -10,0 -21,-12 -5,-9"/><polygon transform="translate(552 338)" points="0,-24 5,-9 21,-12 10,0 21,12 5,9 0,24 -5,9 -21,12 -10,0 -21,-12 -5,-9"/></g></svg>`
+    },
+    {
+      name:'Comoros',
+      svg:`<svg viewBox="0 0 1000 600" role="img" aria-label="Flag of Comoros"><rect width="1000" height="150" y="0" fill="#ffd100"/><rect width="1000" height="150" y="150" fill="#fff"/><rect width="1000" height="150" y="300" fill="#ef3340"/><rect width="1000" height="150" y="450" fill="#003da5"/><polygon points="0,0 520,300 0,600" fill="#009639"/><circle cx="196" cy="300" r="105" fill="#fff"/><circle cx="230" cy="300" r="105" fill="#009639"/><g fill="#fff"><polygon points="196,218 203,238 224,238 207,251 214,271 196,259 178,271 185,251 168,238 189,238"/><polygon points="196,270 203,290 224,290 207,303 214,323 196,311 178,323 185,303 168,290 189,290"/><polygon points="196,322 203,342 224,342 207,355 214,375 196,363 178,375 185,355 168,342 189,342"/><polygon points="196,374 203,394 224,394 207,407 214,427 196,415 178,427 185,407 168,394 189,394"/></g></svg>`
+    },
+    {
+      name:'Djibouti',
+      svg:`<svg viewBox="0 0 900 600" role="img" aria-label="Flag of Djibouti"><rect width="900" height="300" fill="#6ab2e7"/><rect y="300" width="900" height="300" fill="#12ad2b"/><polygon points="0,0 470,300 0,600" fill="#fff"/><polygon fill="#d7141a" points="170,220 190,282 255,282 202,320 223,382 170,344 117,382 138,320 85,282 150,282"/></svg>`
+    },
+    {
+      name:'Equatorial Guinea',
+      svg:`<svg viewBox="0 0 900 600" role="img" aria-label="Flag of Equatorial Guinea"><rect width="900" height="200" fill="#3e9a00"/><rect y="200" width="900" height="200" fill="#fff"/><rect y="400" width="900" height="200" fill="#e32118"/><polygon points="0,0 250,300 0,600" fill="#0073ce"/><g transform="translate(470 300)"><path d="M-70-64 Q0-94 70-64 L60 50 Q0 84-60 50Z" fill="#d9dde2" stroke="#6f7782" stroke-width="5"/><rect x="-8" y="-12" width="16" height="55" rx="5" fill="#7b542f"/><path d="M0-45 C-40-45-48-18-36-3 C-18-22 18-22 36-3 C48-18 40-45 0-45Z" fill="#4f8b42"/><g fill="#f7d117"><polygon points="-62,-106 -58,-94 -45,-94 -55,-86 -51,-74 -62,-81 -73,-74 -69,-86 -79,-94 -66,-94"/><polygon points="-36,-122 -32,-110 -19,-110 -29,-102 -25,-90 -36,-97 -47,-90 -43,-102 -53,-110 -40,-110"/><polygon points="0,-128 4,-116 17,-116 7,-108 11,-96 0,-103 -11,-96 -7,-108 -17,-116 -4,-116"/><polygon points="36,-122 40,-110 53,-110 43,-102 47,-90 36,-97 25,-90 29,-102 19,-110 32,-110"/><polygon points="62,-106 66,-94 79,-94 69,-86 73,-74 62,-81 51,-74 55,-86 45,-94 58,-94"/><polygon points="0,-102 4,-90 17,-90 7,-82 11,-70 0,-77 -11,-70 -7,-82 -17,-90 -4,-90"/></g><path d="M-92 76 Q0 108 92 76" fill="none" stroke="#c7cbd1" stroke-width="16"/><text x="0" y="85" text-anchor="middle" font-size="15" font-family="Arial" fill="#4c5460">UNIDAD • PAZ • JUSTICIA</text></g></svg>`
+    },
+    {
+      name:'Eswatini',
+      svg:`<svg viewBox="0 0 900 600" role="img" aria-label="Flag of Eswatini"><rect width="900" height="600" fill="#3e5eb9"/><rect y="100" width="900" height="400" fill="#ffd100"/><rect y="130" width="900" height="340" fill="#b10c0c"/><g transform="translate(450 300)"><g stroke="#ffd100" stroke-width="10" stroke-linecap="round"><line x1="-245" y1="80" x2="245" y2="-80"/><line x1="-245" y1="-80" x2="245" y2="80"/><line x1="-245" y1="0" x2="245" y2="0"/></g><g fill="#f1f1f1" stroke="#111" stroke-width="6"><path d="M-126-86 Q0-130 126-86 Q160 0 126 86 Q0 130-126 86 Q-160 0-126-86Z"/><path d="M-8-116 Q72-93 126-86 Q160 0 126 86 Q70 101-8 116Z" fill="#111"/></g><path d="M-4-112 Q20-76 7-40 Q28-7 8 18 Q30 55 4 112" fill="none" stroke="#fff" stroke-width="16"/><path d="M-153-80 q-42-18-60 18 q43-5 73 25" fill="#fff" stroke="#111" stroke-width="5"/><path d="M153 80 q42 18 60-18 q-43 5-73-25" fill="#111" stroke="#fff" stroke-width="5"/><g fill="#111"><rect x="-285" y="-13" width="70" height="26" rx="12"/><rect x="215" y="-13" width="70" height="26" rx="12"/></g></g></svg>`
+    },
+    {
+      name:'Gabon',
+      svg:`<svg viewBox="0 0 800 600" role="img" aria-label="Flag of Gabon"><rect width="800" height="200" fill="#009e60"/><rect y="200" width="800" height="200" fill="#fcd116"/><rect y="400" width="800" height="200" fill="#3a75c4"/></svg>`
+    },
+    {
+      name:'Guinea-Bissau',
+      svg:`<svg viewBox="0 0 1200 600" role="img" aria-label="Flag of Guinea-Bissau"><rect width="1200" height="300" fill="#fcd116"/><rect y="300" width="1200" height="300" fill="#009e49"/><rect width="400" height="600" fill="#ce1126"/><polygon fill="#000" points="200,205 223,275 297,275 237,319 260,389 200,346 140,389 163,319 103,275 177,275"/></svg>`
+    },
+    {
+      name:'Lesotho',
+      svg:`<svg viewBox="0 0 900 600" role="img" aria-label="Flag of Lesotho"><rect width="900" height="180" fill="#00209f"/><rect y="180" width="900" height="240" fill="#fff"/><rect y="420" width="900" height="180" fill="#009543"/><g transform="translate(450 300)" fill="#111"><path d="M0-95 C-20-70-40-40-48-10 L48-10 C40-40 20-70 0-95Z"/><path d="M-74-8 Q0-42 74-8 L58 43 Q0 70-58 43Z"/><rect x="-91" y="40" width="182" height="25" rx="12"/><path d="M-47 66 Q0 91 47 66 L34 88 Q0 106-34 88Z"/></g></svg>`
+    },
+    {
+      name:'Malawi',
+      svg:`<svg viewBox="0 0 900 600" role="img" aria-label="Flag of Malawi"><rect width="900" height="200" fill="#000"/><rect y="200" width="900" height="200" fill="#ce1126"/><rect y="400" width="900" height="200" fill="#339e35"/><g transform="translate(450 190)" fill="#ce1126"><path d="M-130 0 A130 130 0 0 1 130 0 L100 0 A100 100 0 0 0 -100 0Z"/><g stroke="#ce1126" stroke-width="14" stroke-linecap="round"><line x1="0" y1="-126" x2="0" y2="-174"/><line x1="-32" y1="-122" x2="-44" y2="-168"/><line x1="32" y1="-122" x2="44" y2="-168"/><line x1="-62" y1="-108" x2="-85" y2="-150"/><line x1="62" y1="-108" x2="85" y2="-150"/><line x1="-88" y1="-87" x2="-121" y2="-121"/><line x1="88" y1="-87" x2="121" y2="-121"/><line x1="-108" y1="-61" x2="-150" y2="-85"/><line x1="108" y1="-61" x2="150" y2="-85"/><line x1="-122" y1="-31" x2="-168" y2="-44"/><line x1="122" y1="-31" x2="168" y2="-44"/></g></g></svg>`
+    },
+    {
+      name:'Mauritania',
+      svg:`<svg viewBox="0 0 900 600" role="img" aria-label="Flag of Mauritania"><rect width="900" height="600" fill="#d01c1f"/><rect y="90" width="900" height="420" fill="#006233"/><g fill="#ffc400"><polygon points="450,150 468,205 526,205 479,239 497,294 450,260 403,294 421,239 374,205 432,205"/><path d="M290 296 A160 160 0 0 0 610 296 A178 178 0 0 1 290 296Z"/></g></svg>`
+    },
+    {
+      name:'São Tomé and Príncipe',
+      svg:`<svg viewBox="0 0 1200 600" role="img" aria-label="Flag of São Tomé and Príncipe"><rect width="1200" height="600" fill="#12ad2b"/><rect y="180" width="1200" height="240" fill="#ffce00"/><polygon points="0,0 360,300 0,600" fill="#d21034"/><g fill="#000"><polygon points="570,220 590,280 653,280 602,317 622,377 570,340 518,377 538,317 487,280 550,280"/><polygon points="870,220 890,280 953,280 902,317 922,377 870,340 818,377 838,317 787,280 850,280"/></g></svg>`
+    },
+    {
+      name:'Seychelles',
+      svg:`<svg viewBox="0 0 1000 500" role="img" aria-label="Flag of Seychelles"><polygon points="0,500 0,0 300,0" fill="#003d88"/><polygon points="0,500 300,0 600,0" fill="#fcd856"/><polygon points="0,500 600,0 1000,145 1000,230" fill="#d9222a"/><polygon points="0,500 1000,230 1000,350" fill="#fff"/><polygon points="0,500 1000,350 1000,500" fill="#007a3d"/></svg>`
+    },
+    {
+      name:'Togo',
+      svg:`<svg viewBox="0 0 1000 618" role="img" aria-label="Flag of Togo"><rect width="1000" height="618" fill="#006a4e"/><rect y="123.6" width="1000" height="123.6" fill="#ffce00"/><rect y="370.8" width="1000" height="123.6" fill="#ffce00"/><rect width="370.8" height="370.8" fill="#d21034"/><polygon fill="#fff" points="185.4,72 211,151 294,151 227,200 252,279 185.4,230 119,279 144,200 77,151 160,151"/></svg>`
+    }
+  ];
+
+  const state = {
+    learnIndex:0,
+    questions:[],
+    questionIndex:0,
+    score:0,
+    streak:0,
+    longestStreak:0,
+    correct:0,
+    responseTimes:[],
+    correctTimes:[],
+    questionStart:null,
+    readyForAnswer:false,
+    locked:false,
+    feedbackTimeout:null,
+    audioCtx:null
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const gameCard = $('gameCard');
+  const learnScreen = $('learnScreen');
+  const transitionScreen = $('transitionScreen');
+  const quizScreen = $('quizScreen');
+  const resultsScreen = $('resultsScreen');
+
+  function showScreen(target){
+    [learnScreen,transitionScreen,quizScreen,resultsScreen].forEach(s=>s.classList.remove('active'));
+    target.classList.add('active');
+  }
+
+  function shuffle(array){
+    const a = array.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  // Fairness: a realistic motor-response grace period prevents ultra-fast guesses from dominating.
+  // After 0.75 s, scoring follows a deterministic progressive decay with widening time bands.
+  // This keeps tiny timing differences from mattering while still rewarding genuinely faster recall.
+  const SCORE_BANDS = [
+    [750,1000], [850,995], [1000,985], [1250,950],
+    [1750,910], [2250,865], [2750,815], [3250,765], [3750,715], [4250,665],
+    [5250,615], [6250,570], [7250,530], [8250,495],
+    [9750,465], [11250,440], [12750,420], [14250,405],
+    [16250,390], [18250,380], [20250,370]
+  ];
+  function calculatePoints(elapsedMs){
+    const ms = Math.max(0, elapsedMs);
+    for(const [limit,points] of SCORE_BANDS){
+      if(ms <= limit) return points;
+    }
+    return 350;
+  }
+
+  const ENCOURAGEMENTS = [
+    {quote:'“You may encounter many defeats, but you must not be defeated.”', by:'Maya Angelou'},
+    {quote:'“It always seems impossible until it’s done.”', by:'Nelson Mandela'},
+    {quote:'“Act as if what you do makes a difference. It does.”', by:'William James'},
+    {quote:'“Fall seven times, stand up eight.”', by:'Japanese proverb'}
+  ];
+
+  // Distinctive, visual retrieval cues used for responsive feedback.
+  // These are intentionally concise: enough to repair the confusion without turning feedback into another study page.
+  const FLAG_GUIDES = {
+    'Benin': {
+      description:'Green vertical block at the hoist; the right side is yellow on top and red below.',
+      cue:'Think “green door + yellow/red rooms”: one tall green block on the left, two stacked colours on the right.'
+    },
+    'Burkina Faso': {
+      description:'Two horizontal halves — red above green — with one yellow star in the centre.',
+      cue:'Red over green, with a single yellow star right in the middle.'
+    },
+    'Burundi': {
+      description:'Red and green sections split by a white diagonal cross, with a white centre circle and three red stars.',
+      cue:'Look for the big white X and the three stars grouped inside the white circle.'
+    },
+    'Comoros': {
+      description:'Four horizontal stripes — yellow, white, red, blue — plus a green triangle with a crescent and four stars.',
+      cue:'It is the “four-stripe + crescent” flag: four coloured bands, then a green triangle packed with white symbols.'
+    },
+    'Djibouti': {
+      description:'Light blue on top, green below, with a white triangle at the hoist containing a red star.',
+      cue:'Light blue + green, then a white side triangle with one red star.'
+    },
+    'Equatorial Guinea': {
+      description:'Green, white and red horizontal stripes with a blue triangle at the hoist and a coat of arms in the centre.',
+      cue:'The giveaway is the blue triangle on the left plus the small central coat of arms.'
+    },
+    'Eswatini': {
+      description:'Blue top and bottom, a broad red centre band edged in yellow, with a large shield and spears.',
+      cue:'This is the very detailed one: red centre, blue edges, and a large black-and-white shield.'
+    },
+    'Gabon': {
+      description:'A simple horizontal tricolour: green on top, yellow in the middle, blue on the bottom.',
+      cue:'No stars or symbols — just green, yellow, blue in three clean horizontal bands.'
+    },
+    'Guinea-Bissau': {
+      description:'A red vertical block at the hoist with a black star; yellow upper-right and green lower-right.',
+      cue:'Think “red side panel + black star”; yellow and green are stacked on the right.'
+    },
+    'Lesotho': {
+      description:'Blue, white and green horizontal stripes with a black Basotho hat centred on the white band.',
+      cue:'Find the black hat in the middle — it is the most distinctive feature.'
+    },
+    'Malawi': {
+      description:'Black, red and green horizontal stripes with a red rising sun on the black top stripe.',
+      cue:'The red sunrise sits on black at the top; below it are red, then green.'
+    },
+    'Mauritania': {
+      description:'A green centre field with a gold crescent and star, bordered by red bands at the top and bottom.',
+      cue:'Green middle + gold crescent/star, framed by red strips above and below.'
+    },
+    'São Tomé and Príncipe': {
+      description:'Green top and bottom, yellow centre, a red triangle at the hoist and two black stars across the yellow.',
+      cue:'Remember the pair of black stars — two stars across yellow, with a red triangle on the left.'
+    },
+    'Seychelles': {
+      description:'Five diagonal colour rays spreading from the lower-left corner: blue, yellow, red, white and green.',
+      cue:'It looks like coloured beams fanning out from the bottom-left corner.'
+    },
+    'Togo': {
+      description:'Five alternating green and yellow horizontal stripes with a red square in the upper-left containing a white star.',
+      cue:'Striped green/yellow background + red top-left box + one white star.'
+    }
+  };
+
+  function responsiveFeedbackMarkup(selectedName, correctName, isCorrect){
+    const correctGuide=FLAG_GUIDES[correctName];
+    if(isCorrect){
+      return `<div class="responsive-feedback good"><div class="feedback-learning-title">🧠 Memory lock-in</div><div class="feedback-learning-row"><span class="feedback-learning-label">Notice this:</span><span class="feedback-learning-text">${correctGuide.cue}</span></div></div>`;
+    }
+    const selectedGuide=FLAG_GUIDES[selectedName];
+    return `<div class="responsive-feedback bad"><div class="feedback-learning-title">🧠 Quick correction</div><div class="feedback-learning-row"><span class="feedback-learning-label">You chose ${selectedName}:</span><span class="feedback-learning-text">${selectedGuide.description}</span></div><div class="feedback-learning-row"><span class="feedback-learning-label">Correct: ${correctName}:</span><span class="feedback-learning-text">${correctGuide.cue}</span></div></div>`;
+  }
+
+  // Built-in meme cards keep the game fully self-contained/offline. Meme selection happens
+  // only AFTER the answer/timer is locked, so visual randomness cannot affect scoring fairness.
+  const CORRECT_MEMES = [
+    {emoji:'😸',spark:'🏆',headline:'ABSOLUTELY PURR-FECT',sub:'That flag never stood a chance.'},
+    {emoji:'😼',spark:'✨',headline:'BIG BRAIN CAT APPROVES',sub:'Locked in. Clean recall.'},
+    {emoji:'🐱',spark:'🎉',headline:'THAT’S A W',sub:'Tiny paws. Huge knowledge.'},
+    {emoji:'😹',spark:'🔥',headline:'THE CAT IS IMPRESSED',sub:'Keep cooking.'},
+    {emoji:'🐶',spark:'🎓',headline:'HONOUR ROLL PUP',sub:'That recall was ridiculously clean.'},
+    {emoji:'🦦',spark:'🙌',headline:'OTTERLY CORRECT',sub:'Yes, the pun was necessary.'},
+    {emoji:'🐈‍⬛',spark:'💚',headline:'NAILED IT',sub:'Certified flag-recognition moment.'},
+    {emoji:'😺',spark:'⭐',headline:'MAIN CHARACTER ANSWER',sub:'Smooth. Very smooth.'}
+  ];
+  const WRONG_MEMES = [
+    {emoji:'😿',spark:'📦',headline:'WELL… THAT HAPPENED',sub:'Tiny setback. Next flag.'},
+    {emoji:'🙀',spark:'🧶',headline:'GOT A LITTLE TANGLED',sub:'You know it now — keep going.'},
+    {emoji:'🐱',spark:'💫',headline:'NOT QUITE',sub:'Reset. Refocus. Next one.'},
+    {emoji:'😹',spark:'🫠',headline:'THE CAT HAS ALSO MADE MISTAKES',sub:'No shame. Bank the answer.'},
+    {emoji:'🐈',spark:'📚',headline:'STUDY CAT SAYS: RUN IT BACK',sub:'One miss ≠ game over.'},
+    {emoji:'😼',spark:'🧠',headline:'PLOT TWIST',sub:'Now this flag is harder to forget.'},
+    {emoji:'🐶',spark:'🫣',headline:'THE PUP SAW NOTHING',sub:'Use the memory jog and bounce back.'},
+    {emoji:'🦝',spark:'📖',headline:'RACCOON RESEARCH ARC',sub:'One correction now saves a miss later.'}
+  ];
+  const memeHistory={correct:-1,wrong:-1};
+
+  function pickMeme(isCorrect){
+    const pool=isCorrect?CORRECT_MEMES:WRONG_MEMES;
+    const key=isCorrect?'correct':'wrong';
+    let idx=Math.floor(Math.random()*pool.length);
+    if(pool.length>1 && idx===memeHistory[key]) idx=(idx+1+Math.floor(Math.random()*(pool.length-1)))%pool.length;
+    memeHistory[key]=idx;
+    return pool[idx];
+  }
+
+  function memeMarkup(isCorrect){
+    const meme=pickMeme(isCorrect);
+    return `<div class="meme-card ${isCorrect?'good-meme':'bad-meme'}" aria-label="${isCorrect?'Celebration':'Keep going'} meme"><div class="meme-visual"><span class="meme-emoji">${meme.emoji}</span><span class="meme-spark">${meme.spark}</span></div><div class="meme-copy"><span class="meme-headline">${meme.headline}</span><span class="meme-subline">${meme.sub}</span></div></div>`;
+  }
+
+  function formatTime(ms){
+    if(!Number.isFinite(ms)) return '—';
+    return `${(ms/1000).toFixed(2)} s`;
+  }
+
+  function renderLearningFlag(){
+    const item = FLAGS[state.learnIndex];
+    $('learnFlag').innerHTML = item.svg;
+    $('learnCountry').textContent = item.name;
+    $('learnProgressText').textContent = `Flag ${state.learnIndex+1} of ${FLAGS.length}`;
+    $('learnProgressBar').style.width = `${((state.learnIndex+1)/FLAGS.length)*100}%`;
+    $('nextFlagBtn').textContent = state.learnIndex === FLAGS.length-1 ? 'Finish Learning →' : 'Next Flag →';
+  }
+
+  function nextLearningFlag(){
+    const stage = $('learnFlagStage');
+    stage.classList.add('swapping');
+    setTimeout(()=>{
+      if(state.learnIndex < FLAGS.length-1){
+        state.learnIndex++;
+        renderLearningFlag();
+        stage.classList.remove('swapping');
+      } else {
+        stage.classList.remove('swapping');
+        showScreen(transitionScreen);
+      }
+    },160);
+  }
+
+  function buildQuestions(){
+    const order = shuffle(FLAGS);
+    return order.map(correct => {
+      const distractors = shuffle(FLAGS.filter(x=>x.name!==correct.name)).slice(0,3);
+      return {correct, options:shuffle([correct,...distractors])};
+    });
+  }
+
+  function ensureAudio(){
+    if(!state.audioCtx){
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if(Ctx) state.audioCtx = new Ctx();
+    }
+    if(state.audioCtx && state.audioCtx.state === 'suspended') state.audioCtx.resume().catch(()=>{});
+  }
+
+  function tone(freq, start, duration, type='sine', gain=.045){
+    if(!state.audioCtx) return;
+    const ctx = state.audioCtx;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+    g.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+    g.gain.exponentialRampToValueAtTime(gain, ctx.currentTime + start + .015);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + duration);
+    osc.connect(g).connect(ctx.destination);
+    osc.start(ctx.currentTime + start);
+    osc.stop(ctx.currentTime + start + duration + .03);
+  }
+
+  function playCorrectSound(){
+    ensureAudio();
+    tone(523.25,0,.12,'sine',.05);
+    tone(659.25,.085,.13,'sine',.05);
+    tone(783.99,.17,.16,'sine',.055);
+  }
+
+  function playWrongSound(){
+    ensureAudio();
+    tone(220,0,.16,'triangle',.045);
+    tone(164.81,.13,.2,'triangle',.04);
+  }
+
+  function showCorrectCelebration(){
+    const overlay=$('celebrationOverlay');
+    overlay.innerHTML='';
+    const particleCount=34;
+    for(let i=0;i<particleCount;i++){
+      const spark=document.createElement('div');
+      spark.className=`spark${i%4===0?' line':''}`;
+      const angle=(Math.PI*2*i/particleCount)+(Math.random()*.22-.11);
+      const distance=95+Math.random()*250;
+      const dx=Math.cos(angle)*distance;
+      const dy=Math.sin(angle)*distance-(Math.random()*40);
+      spark.style.setProperty('--dx',`${dx.toFixed(0)}px`);
+      spark.style.setProperty('--dy',`${dy.toFixed(0)}px`);
+      spark.style.setProperty('--rot',`${Math.round(Math.random()*360)}deg`);
+      spark.style.setProperty('--scale',`${(.65+Math.random()*1.15).toFixed(2)}`);
+      spark.style.setProperty('--dur',`${(.62+Math.random()*.42).toFixed(2)}s`);
+      spark.style.background=i%5===0?'#a7f3d0':i%3===0?'#5ee39c':'#21c978';
+      overlay.appendChild(spark);
+    }
+    setTimeout(()=>{overlay.innerHTML='';},1150);
+  }
+
+  function startQuiz(){
+    ensureAudio();
+    if(state.feedbackTimeout){clearTimeout(state.feedbackTimeout);state.feedbackTimeout=null;}
+    state.questions = buildQuestions();
+    state.questionIndex = 0;
+    state.score = 0;
+    state.streak = 0;
+    state.longestStreak = 0;
+    state.correct = 0;
+    state.responseTimes = [];
+    state.correctTimes = [];
+    state.questionStart = null;
+    state.readyForAnswer = false;
+    state.locked = false;
+    memeHistory.correct=-1;
+    memeHistory.wrong=-1;
+    $('scoreValue').textContent='0';
+    $('streakValue').textContent='0 🔥';
+    showScreen(quizScreen);
+    renderQuestion();
+  }
+
+  function renderQuestion(){
+    state.readyForAnswer = false;
+    state.locked = false;
+    state.questionStart = null;
+    gameCard.classList.remove('correct-flash','wrong-flash');
+    const feedback = $('feedback');
+    feedback.className='feedback-panel';
+    feedback.innerHTML='';
+    const nextBtn = $('nextQuestionBtn');
+    nextBtn.hidden = true;
+    nextBtn.disabled = false;
+
+    const q = state.questions[state.questionIndex];
+    $('questionNumber').textContent = `${state.questionIndex+1} / ${FLAGS.length}`;
+    $('scoreValue').textContent = state.score.toLocaleString();
+    $('streakValue').textContent = `${state.streak} 🔥`;
+    $('quizFlag').innerHTML = q.correct.svg;
+
+    const answers = $('answers');
+    answers.innerHTML='';
+    q.options.forEach(opt=>{
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='answer-btn';
+      btn.textContent=opt.name;
+      btn.dataset.name=opt.name;
+      btn.disabled=true;
+      btn.addEventListener('click',()=>answerQuestion(opt.name,btn));
+      answers.appendChild(btn);
+    });
+
+    // Two animation frames ensure layout/paint is ready before timing begins.
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      [...answers.children].forEach(b=>b.disabled=false);
+      state.questionStart=performance.now();
+      state.readyForAnswer=true;
+    }));
+  }
+
+  function answerQuestion(selectedName, selectedButton){
+    if(!state.readyForAnswer || state.locked || state.questionStart===null) return;
+    const elapsed = performance.now() - state.questionStart; // stop timing immediately on selection
+    state.readyForAnswer=false;
+    state.locked=true;
+    state.questionStart=null;
+
+    const q = state.questions[state.questionIndex];
+    const isCorrect = selectedName === q.correct.name;
+    state.responseTimes.push(elapsed);
+
+    const allButtons=[...$('answers').children];
+    allButtons.forEach(btn=>{
+      btn.disabled=true;
+      if(btn.dataset.name===q.correct.name) btn.classList.add('correct-choice');
+    });
+
+    const feedback=$('feedback');
+    feedback.classList.add('show');
+
+    if(isCorrect){
+      const points=calculatePoints(elapsed);
+      state.score += points;
+      state.correct++;
+      state.streak++;
+      state.longestStreak=Math.max(state.longestStreak,state.streak);
+      state.correctTimes.push(elapsed);
+      gameCard.classList.remove('wrong-flash');
+      void gameCard.offsetWidth;
+      gameCard.classList.add('correct-flash');
+      feedback.classList.add('good');
+      feedback.innerHTML=`<div>CORRECT! <span class="feedback-sub">+${points.toLocaleString()} points · ${formatTime(elapsed)}</span></div>${responsiveFeedbackMarkup(selectedName,q.correct.name,true)}${memeMarkup(true)}`;
+      $('scoreValue').textContent=state.score.toLocaleString();
+      $('streakValue').textContent=`${state.streak} 🔥`;
+      playCorrectSound();
+      showCorrectCelebration();
+      if(state.streak>=3) showHotStreak(state.streak);
+      const nextBtn=$('nextQuestionBtn');
+      nextBtn.textContent=state.questionIndex===FLAGS.length-1?'View Results →':'Next Question →';
+      nextBtn.hidden=false;
+    } else {
+      state.streak=0;
+      selectedButton.classList.add('wrong-choice');
+      gameCard.classList.remove('correct-flash');
+      void gameCard.offsetWidth;
+      gameCard.classList.add('wrong-flash');
+      feedback.classList.add('bad');
+      const encouragement=ENCOURAGEMENTS[state.questionIndex % ENCOURAGEMENTS.length];
+      feedback.innerHTML=`<div>UNLUCKY — INCORRECT <span class="feedback-sub">Correct answer: <strong>${q.correct.name}</strong> · 0 points</span></div>${responsiveFeedbackMarkup(selectedName,q.correct.name,false)}${memeMarkup(false)}<span class="encouragement">${encouragement.quote} — ${encouragement.by}</span>`;
+      $('streakValue').textContent='0 🔥';
+      playWrongSound();
+      const nextBtn=$('nextQuestionBtn');
+      nextBtn.textContent=state.questionIndex===FLAGS.length-1?'View Results →':'Next Question →';
+      nextBtn.hidden=false;
+    }
+  }
+
+  function showHotStreak(n){
+    const overlay=$('streakOverlay');
+    overlay.innerHTML=`<div class="streak-banner">🔥 ${n} STREAK 🔥<small>${n===3?'HOT STREAK!':'STILL ON FIRE!'}</small></div>`;
+    const count=16;
+    for(let i=0;i<count;i++){
+      const f=document.createElement('div');
+      f.className='flame';
+      f.textContent=i%4===0?'✨':'🔥';
+      f.style.left=`${4+Math.random()*92}%`;
+      f.style.animationDelay=`${Math.random()*.22}s`;
+      f.style.animationDuration=`${.72+Math.random()*.35}s`;
+      overlay.appendChild(f);
+    }
+    overlay.classList.add('show');
+    setTimeout(()=>{overlay.classList.remove('show');overlay.innerHTML='';},980);
+  }
+
+  function nextQuestion(){
+    state.feedbackTimeout=null;
+    const nextBtn=$('nextQuestionBtn');
+    nextBtn.hidden=true;
+    nextBtn.disabled=true;
+    if(state.questionIndex < FLAGS.length-1){
+      state.questionIndex++;
+      renderQuestion();
+    } else {
+      finishGame();
+    }
+  }
+
+  function finishGame(){
+    state.readyForAnswer=false;
+    state.locked=true;
+    const avg=state.responseTimes.length ? state.responseTimes.reduce((a,b)=>a+b,0)/state.responseTimes.length : NaN;
+    const fastest=state.correctTimes.length ? Math.min(...state.correctTimes) : NaN;
+    const accuracy=(state.correct/FLAGS.length)*100;
+
+    $('finalScore').textContent=state.score.toLocaleString();
+    $('finalLongest').textContent=state.longestStreak;
+    $('finalCorrect').textContent=`${state.correct} / ${FLAGS.length}`;
+    $('finalAccuracy').textContent=`${accuracy.toFixed(0)}%`;
+    $('finalAverage').textContent=formatTime(avg);
+    $('finalFastest').textContent=formatTime(fastest);
+    showScreen(resultsScreen);
+  }
+
+  function fullReset(){
+    if(state.feedbackTimeout){clearTimeout(state.feedbackTimeout);state.feedbackTimeout=null;}
+    state.learnIndex=0;
+    state.questions=[];
+    state.questionIndex=0;
+    state.score=0;
+    state.streak=0;
+    state.longestStreak=0;
+    state.correct=0;
+    state.responseTimes=[];
+    state.correctTimes=[];
+    state.questionStart=null;
+    state.readyForAnswer=false;
+    state.locked=false;
+    memeHistory.correct=-1;
+    memeHistory.wrong=-1;
+    $('scoreValue').textContent='0';
+    $('streakValue').textContent='0 🔥';
+    $('questionNumber').textContent=`1 / ${FLAGS.length}`;
+    $('feedback').className='feedback-panel';
+    $('feedback').innerHTML='';
+    gameCard.classList.remove('correct-flash','wrong-flash');
+    $('streakOverlay').classList.remove('show');
+    $('streakOverlay').innerHTML='';
+    $('celebrationOverlay').innerHTML='';
+    $('nextQuestionBtn').hidden=true;
+    $('nextQuestionBtn').disabled=false;
+    renderLearningFlag();
+    showScreen(learnScreen);
+  }
+
+  $('nextFlagBtn').addEventListener('click',()=>{ensureAudio();nextLearningFlag();});
+  $('startQuizBtn').addEventListener('click',startQuiz);
+  $('nextQuestionBtn').addEventListener('click',nextQuestion);
+  $('playAgainBtn').addEventListener('click',fullReset);
+
+  // Expose a tiny read-only-ish test surface for local verification.
+  window.FlagGameTest = {
+    names:()=>FLAGS.map(f=>f.name),
+    calculatePoints,
+    buildQuestions,
+    getState:()=>({
+      learnIndex:state.learnIndex, questionIndex:state.questionIndex, score:state.score,
+      streak:state.streak, longestStreak:state.longestStreak, correct:state.correct,
+      responseCount:state.responseTimes.length, correctTimeCount:state.correctTimes.length
+    })
+  };
+
+  renderLearningFlag();
+})();
+</script>
+</body>
+</html>
