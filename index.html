@@ -182,6 +182,11 @@
   .stat-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:#7b8094;font-weight:850;display:block;margin-bottom:2px}
   .stat-value{font-weight:950;font-size:1.04rem;white-space:nowrap}
   .q-number{font-weight:950;color:var(--purple);font-size:1rem;text-align:center;white-space:nowrap}
+  .timer-block{text-align:center;min-width:92px}
+  .timer-value{display:block;font-weight:1000;color:var(--purple);font-size:1.35rem;line-height:1}
+  .timer-value.urgent{color:var(--red-dark);animation:timerPulse .7s ease-in-out infinite alternate}
+  .attempt-count{display:block;margin-top:4px;color:#777d90;font-size:.72rem;font-weight:850;white-space:nowrap}
+  @keyframes timerPulse{to{transform:scale(1.06)}}
 
   .quiz-flag-stage{min-height:clamp(190px,34vw,280px);margin:2px auto 12px}
   .quiz-flag-stage .flag-frame{width:min(480px,86%)}
@@ -211,6 +216,47 @@
   .answer-btn:disabled{cursor:default}
   .answer-btn.correct-choice{background:#e9fbf2;border-color:#35bd79;color:#087342}
   .answer-btn.wrong-choice{background:#fff0f1;border-color:#ef5966;color:#a91e2c}
+
+  .hint-zone{
+    width:min(560px,100%);
+    margin:3px auto 8px;
+    text-align:center;
+  }
+  .hint-btn{
+    border:1.5px solid #c8c2ff;
+    background:#f5f3ff;
+    color:#5144db;
+    border-radius:13px;
+    min-height:44px;
+    padding:9px 15px;
+    font-weight:900;
+    cursor:pointer;
+    transition:transform .1s ease,background .12s ease,border-color .12s ease;
+  }
+  .hint-btn:hover:not(:disabled){background:#eeeaff;border-color:#9f95ff;transform:translateY(-1px)}
+  .hint-btn:disabled{cursor:default;opacity:.65}
+  .hint-btn[hidden],.hint-box[hidden]{display:none}
+  .hint-availability{
+    display:block;
+    margin-top:5px;
+    color:#7a7891;
+    font-size:.72rem;
+    font-weight:780;
+    line-height:1.3;
+  }
+  .hint-box{
+    margin-top:7px;
+    padding:10px 12px;
+    border:1px solid #d8d3ff;
+    border-radius:13px;
+    background:#faf9ff;
+    color:#4d4672;
+    text-align:left;
+    font-size:.84rem;
+    line-height:1.4;
+    font-weight:760;
+  }
+  .hint-box strong{color:#4036b9}
 
   .feedback-panel{
     min-height:56px;
@@ -256,8 +302,39 @@
   .responsive-feedback.good .feedback-learning-text{color:#27634a}
   .responsive-feedback.bad .feedback-learning-text{color:#71451f}
 
+  .confusion-card{
+    margin-top:10px;
+    padding:10px;
+    border-radius:13px;
+    background:#fff;
+    border:1px solid rgba(124,63,16,.14);
+  }
+  .confusion-title{
+    font-weight:950;
+    color:#7c3f10;
+    margin-bottom:7px;
+    font-size:.8rem;
+  }
+  .confusion-grid{
+    display:grid;
+    grid-template-columns:118px 1fr;
+    gap:10px;
+    align-items:center;
+  }
+  .confusion-flag{
+    width:118px;
+    border-radius:7px;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(20,22,45,.12);
+    background:#fff;
+  }
+  .confusion-flag svg{display:block;width:100%;height:auto}
+  .confusion-copy{color:#65482f;font-size:.8rem;font-weight:760;line-height:1.35}
+
   @media (max-width:520px){
     .feedback-learning-row{grid-template-columns:1fr;gap:2px}
+    .confusion-grid{grid-template-columns:92px 1fr}
+    .confusion-flag{width:92px}
   }
 
   .meme-card{
@@ -472,10 +549,12 @@
       <div class="transition-icon">🧠✨</div>
       <div class="eyebrow">Learning complete</div>
       <h2>You’ve seen all 15 flags.</h2>
-      <p class="subtitle">Now let’s see how many you remember — and how quickly you can recall them.</p>
+      <p class="subtitle">You now have a 2-minute recall sprint. Answer as many flags as you can.</p>
       <div class="rules">
-        <strong>Competition scoring:</strong> every correct answer earns 350–1000 points. The first 0.75 seconds are a full-score grace window. After that, points fall on a progressive curve: the early drop is tiny, the middle becomes more meaningful, and the later drop tapers so a correct answer is still worth substantial points. Incorrect answers earn 0.<br><br>
-        <strong>Hot streak:</strong> 3+ correct answers in a row triggers 🔥 HOT STREAK. Streaks do not add score.
+        <strong>How it works:</strong> every new question randomly selects one of the 15 flags, with each flag equally likely every time. Repeats are possible — one flag may appear several times while another may appear only once.<br><br>
+        <strong>Fair timing:</strong> the 2-minute challenge clock runs only while a flag is on screen and ready for your answer. It pauses during feedback, so reading the memory jog does not cost you quiz time. Faster recall means you can complete more questions.<br><br>
+        <strong>Adaptive support:</strong> if you repeatedly miss the same flag, an optional hint will become available and grow a little more specific if the miss streak continues. If you keep choosing the same wrong country, the feedback will show you what that country’s flag actually looks like. Getting a flag correct resets its hint chain.<br><br>
+        <strong>Competition scoring:</strong> every correct answer earns 350–1000 points using the same speed-based curve. Incorrect answers earn 0. 3+ correct answers in a row triggers 🔥 HOT STREAK, but streaks do not add score.
       </div>
       <button class="primary-btn" id="startQuizBtn" type="button">START QUIZ</button>
     </section>
@@ -486,7 +565,10 @@
           <span class="stat-label">Score</span>
           <span class="stat-value" id="scoreValue">0</span>
         </div>
-        <div class="q-number" id="questionNumber">1 / 15</div>
+        <div class="timer-block">
+          <span class="timer-value" id="quizTimer">2:00</span>
+          <span class="attempt-count" id="attemptCount">Attempt 1</span>
+        </div>
         <div class="stat-chip right">
           <span class="stat-label">Streak</span>
           <span class="stat-value" id="streakValue">0 🔥</span>
@@ -494,6 +576,11 @@
       </div>
       <div class="flag-stage quiz-flag-stage" id="quizFlagStage">
         <div class="flag-frame" id="quizFlag"></div>
+      </div>
+      <div class="hint-zone" id="hintZone">
+        <button class="hint-btn" id="hintBtn" type="button" hidden>💡 Show Hint</button>
+        <span class="hint-availability" id="hintAvailability" hidden></span>
+        <div class="hint-box" id="hintBox" aria-live="polite" hidden></div>
       </div>
       <div class="answers" id="answers"></div>
       <div class="feedback-panel" id="feedback" aria-live="polite"></div>
@@ -521,10 +608,12 @@
         </div>
 
         <div class="detail-grid">
-          <div class="detail-card"><span>Correct answers</span><strong id="finalCorrect">0 / 15</strong></div>
+          <div class="detail-card"><span>Questions answered</span><strong id="finalAttempts">0</strong></div>
+          <div class="detail-card"><span>Correct answers</span><strong id="finalCorrect">0</strong></div>
           <div class="detail-card"><span>Accuracy</span><strong id="finalAccuracy">0%</strong></div>
           <div class="detail-card"><span>Average response time</span><strong id="finalAverage">—</strong></div>
           <div class="detail-card"><span>Fastest correct response</span><strong id="finalFastest">—</strong></div>
+          <div class="detail-card"><span>Active quiz time</span><strong>2:00</strong></div>
         </div>
 
         <div class="prize-note">
@@ -533,7 +622,7 @@
         </div>
 
         <button class="primary-btn" id="playAgainBtn" type="button">Play Again</button>
-        <div class="footer-note">Play Again fully resets the learning round, score, timers, streaks, question order and answer order.</div>
+        <div class="footer-note">Play Again fully resets the learning round, score, timer, streaks, random flag draws and answer order.</div>
       </div>
     </section>
 
@@ -609,10 +698,12 @@
     }
   ];
 
+  const CHALLENGE_DURATION_MS = 120000;
+
   const state = {
     learnIndex:0,
-    questions:[],
-    questionIndex:0,
+    currentQuestion:null,
+    attempts:0,
     score:0,
     streak:0,
     longestStreak:0,
@@ -622,7 +713,12 @@
     questionStart:null,
     readyForAnswer:false,
     locked:false,
-    feedbackTimeout:null,
+    remainingMs:CHALLENGE_DURATION_MS,
+    activeSliceStart:null,
+    timerInterval:null,
+    timerExpired:false,
+    flagMissStreak:{},
+    wrongChoiceCounts:{},
     audioCtx:null
   };
 
@@ -737,13 +833,144 @@
     }
   };
 
-  function responsiveFeedbackMarkup(selectedName, correctName, isCorrect){
+  // Adaptive hint ladder. Hints are tied to consecutive misses of the current target flag:
+  // 2 misses -> level 1, 3 misses -> level 2, 4+ misses -> level 3. A correct answer resets the ladder.
+  const FLAG_HINTS = {
+    'Benin': [
+      'Focus on the overall layout: this flag mixes one vertical section with a larger split section.',
+      'Look carefully at the hoist (left edge): one tall colour block sits beside two colours stacked on the right.',
+      'Use the left-side block as your anchor; the two right-hand sections are warm colours stacked top and bottom.'
+    ],
+    'Burkina Faso': [
+      'Focus on the centre: there is one simple symbol sitting over a two-part background.',
+      'The background is split horizontally into two strong colours, with a single star in the middle.',
+      'Think red-over-green with one bright central star — no side panel or triangle.'
+    ],
+    'Burundi': [
+      'Look for a strong geometric divider rather than ordinary horizontal stripes.',
+      'A broad white diagonal cross divides the flag and frames a circular centre.',
+      'The centre circle contains three small stars; use the large white X as the main anchor.'
+    ],
+    'Comoros': [
+      'Count the main horizontal sections and then check the hoist for an extra shape.',
+      'There are four horizontal colour bands plus a large triangle on the left.',
+      'Inside the green left triangle, look for a white crescent and a vertical group of stars.'
+    ],
+    'Djibouti': [
+      'The flag is mostly two horizontal fields, but the left edge contains a contrasting shape.',
+      'Look for a white triangle on the left cutting into a light-blue and green background.',
+      'The white left triangle contains a single red star — that is the key distinguishing mark.'
+    ],
+    'Equatorial Guinea': [
+      'Start by noticing the side shape before the horizontal colour bands.',
+      'A blue triangle sits on the left, beside three horizontal bands.',
+      'The centre also contains a small coat of arms; blue side triangle + central emblem is the strongest cue.'
+    ],
+    'Eswatini': [
+      'This is one of the most detailed flags in the set, so focus on the large central object.',
+      'A broad red middle band contains a large black-and-white ceremonial object, with blue at the outer edges.',
+      'Look for the large shield and crossed spears in the centre — much more detailed than the other flags.'
+    ],
+    'Gabon': [
+      'This is one of the simplest flags in the set: no symbols and no side panel.',
+      'It uses exactly three clean horizontal bands.',
+      'Read the bands from top to bottom as green, yellow, then blue.'
+    ],
+    'Guinea-Bissau': [
+      'Look for a vertical panel on the left and two stacked sections on the right.',
+      'The left panel contains a single dark star, while the right side is split horizontally.',
+      'Anchor on the red left panel with a black star; yellow is upper-right and green is lower-right.'
+    ],
+    'Lesotho': [
+      'The key is a single dark object placed in the centre of a light middle band.',
+      'It has three horizontal bands, with a black traditional object centred on the white band.',
+      'The central black Basotho hat is the giveaway; blue is above and green is below.'
+    ],
+    'Malawi': [
+      'Look at the top band for a symbol that rises from the border beneath it.',
+      'Three horizontal bands are used, and the upper dark band carries a red rising-sun shape.',
+      'The red sunrise on the black top band is the distinctive clue; red and green bands sit below.'
+    ],
+    'Mauritania': [
+      'Focus on the central symbol and the narrow bands framing the flag.',
+      'A green centre contains a gold celestial symbol, with red strips at the top and bottom.',
+      'Look for the gold crescent and star on green, framed by red above and below.'
+    ],
+    'São Tomé and Príncipe': [
+      'Look for a side triangle plus more than one repeated symbol across the centre.',
+      'A red triangle sits on the left, and two dark stars lie across a yellow middle band.',
+      'The pair of black stars across yellow is the key cue; green sits above and below.'
+    ],
+    'Seychelles': [
+      'Ignore horizontal stripes — this flag is built from angled sections.',
+      'Several colour wedges spread diagonally from one corner.',
+      'All five coloured rays fan outward from the bottom-left corner.'
+    ],
+    'Togo': [
+      'Look for repeated thin stripes plus a separate block in the upper-left.',
+      'The background alternates green and yellow stripes, with a contrasting square at the top-left.',
+      'The red upper-left square contains one white star; the rest is green/yellow striping.'
+    ]
+  };
+
+  function getHintLevel(countryName){
+    const misses=state.flagMissStreak[countryName]||0;
+    if(misses>=4) return 3;
+    if(misses>=3) return 2;
+    if(misses>=2) return 1;
+    return 0;
+  }
+
+  function setupHintForCurrentQuestion(){
+    const btn=$('hintBtn');
+    const availability=$('hintAvailability');
+    const box=$('hintBox');
+    btn.hidden=true;
+    btn.disabled=false;
+    availability.hidden=true;
+    availability.textContent='';
+    box.hidden=true;
+    box.innerHTML='';
+
+    if(!state.currentQuestion) return;
+    const country=state.currentQuestion.correct.name;
+    const misses=state.flagMissStreak[country]||0;
+    const level=getHintLevel(country);
+    if(level===0) return;
+
+    btn.hidden=false;
+    btn.textContent=level===1?'💡 Show Hint':'💡 Show Stronger Hint';
+    availability.hidden=false;
+    availability.textContent=`Memory jog available — this flag has been missed ${misses} ${misses===1?'time':'times'} in a row.`;
+  }
+
+  function revealHint(){
+    if(!state.readyForAnswer || state.locked || !state.currentQuestion) return;
+    const country=state.currentQuestion.correct.name;
+    const level=getHintLevel(country);
+    if(level===0) return;
+    const hint=(FLAG_HINTS[country]||[])[level-1];
+    if(!hint) return;
+    const btn=$('hintBtn');
+    const box=$('hintBox');
+    box.innerHTML=`<strong>Hint level ${level}:</strong> ${hint}`;
+    box.hidden=false;
+    btn.disabled=true;
+    btn.textContent='Hint revealed';
+    // Intentionally do not pause either timer: using a hint is part of active answering time.
+  }
+
+  function responsiveFeedbackMarkup(selectedName, correctName, isCorrect, wrongChoiceCount=0){
     const correctGuide=FLAG_GUIDES[correctName];
     if(isCorrect){
       return `<div class="responsive-feedback good"><div class="feedback-learning-title">🧠 Memory lock-in</div><div class="feedback-learning-row"><span class="feedback-learning-label">Notice this:</span><span class="feedback-learning-text">${correctGuide.cue}</span></div></div>`;
     }
     const selectedGuide=FLAG_GUIDES[selectedName];
-    return `<div class="responsive-feedback bad"><div class="feedback-learning-title">🧠 Quick correction</div><div class="feedback-learning-row"><span class="feedback-learning-label">You chose ${selectedName}:</span><span class="feedback-learning-text">${selectedGuide.description}</span></div><div class="feedback-learning-row"><span class="feedback-learning-label">Correct: ${correctName}:</span><span class="feedback-learning-text">${correctGuide.cue}</span></div></div>`;
+    const selectedFlag=FLAGS.find(flag=>flag.name===selectedName);
+    const confusionMarkup=wrongChoiceCount>=2 && selectedFlag
+      ? `<div class="confusion-card"><div class="confusion-title">👀 Repeated confusion detected</div><div class="confusion-grid"><div class="confusion-flag">${selectedFlag.svg}</div><div class="confusion-copy">You’ve selected <strong>${selectedName}</strong> incorrectly ${wrongChoiceCount} times. This is what ${selectedName} actually looks like: ${selectedGuide.description}</div></div></div>`
+      : '';
+    return `<div class="responsive-feedback bad"><div class="feedback-learning-title">🧠 Quick correction</div><div class="feedback-learning-row"><span class="feedback-learning-label">You chose ${selectedName}:</span><span class="feedback-learning-text">${selectedGuide.description}</span></div><div class="feedback-learning-row"><span class="feedback-learning-label">Correct: ${correctName}:</span><span class="feedback-learning-text">${correctGuide.cue}</span></div>${confusionMarkup}</div>`;
   }
 
   // Built-in meme cards keep the game fully self-contained/offline. Meme selection happens
@@ -813,12 +1040,76 @@
     },160);
   }
 
-  function buildQuestions(){
-    const order = shuffle(FLAGS);
-    return order.map(correct => {
-      const distractors = shuffle(FLAGS.filter(x=>x.name!==correct.name)).slice(0,3);
-      return {correct, options:shuffle([correct,...distractors])};
-    });
+  function buildRandomQuestion(){
+    // Independent uniform draw: every flag has the same 1/15 chance on every question.
+    const correct = FLAGS[Math.floor(Math.random()*FLAGS.length)];
+    const distractors = shuffle(FLAGS.filter(x=>x.name!==correct.name)).slice(0,3);
+    return {correct, options:shuffle([correct,...distractors])};
+  }
+
+  function getRemainingMs(now=performance.now()){
+    if(state.activeSliceStart===null) return Math.max(0,state.remainingMs);
+    return Math.max(0,state.remainingMs-(now-state.activeSliceStart));
+  }
+
+  function formatCountdown(ms){
+    const totalSeconds=Math.max(0,Math.ceil(ms/1000));
+    const minutes=Math.floor(totalSeconds/60);
+    const seconds=totalSeconds%60;
+    return `${minutes}:${String(seconds).padStart(2,'0')}`;
+  }
+
+  function updateChallengeTimer(){
+    const remaining=getRemainingMs();
+    const timer=$('quizTimer');
+    timer.textContent=formatCountdown(remaining);
+    timer.classList.toggle('urgent',remaining>0 && remaining<=10000);
+    if(remaining<=0 && !state.timerExpired) expireChallenge();
+  }
+
+  function resumeChallengeTimer(){
+    if(state.timerExpired || state.activeSliceStart!==null || state.remainingMs<=0) return;
+    state.activeSliceStart=performance.now();
+    clearInterval(state.timerInterval);
+    state.timerInterval=setInterval(updateChallengeTimer,50);
+    updateChallengeTimer();
+  }
+
+  function pauseChallengeTimer(now=performance.now()){
+    if(state.activeSliceStart!==null){
+      state.remainingMs=Math.max(0,state.remainingMs-(now-state.activeSliceStart));
+      state.activeSliceStart=null;
+    }
+    clearInterval(state.timerInterval);
+    state.timerInterval=null;
+    updateChallengeTimer();
+  }
+
+  function expireChallenge(){
+    if(state.timerExpired) return;
+    state.timerExpired=true;
+    state.remainingMs=0;
+    state.activeSliceStart=null;
+    clearInterval(state.timerInterval);
+    state.timerInterval=null;
+    $('quizTimer').textContent='0:00';
+    $('quizTimer').classList.remove('urgent');
+    state.readyForAnswer=false;
+    state.locked=true;
+    state.questionStart=null;
+    [...$('answers').children].forEach(btn=>btn.disabled=true);
+    $('hintBtn').disabled=true;
+    $('hintBtn').hidden=true;
+    $('hintAvailability').hidden=true;
+    const feedback=$('feedback');
+    if(!feedback.classList.contains('show')){
+      feedback.className='feedback-panel show';
+      feedback.innerHTML='<div>TIME’S UP! ⏱️ <span class="feedback-sub">The current unanswered flag does not count as an attempt.</span></div>';
+    }
+    const nextBtn=$('nextQuestionBtn');
+    nextBtn.textContent='View Results →';
+    nextBtn.hidden=false;
+    nextBtn.disabled=false;
   }
 
   function ensureAudio(){
@@ -881,9 +1172,9 @@
 
   function startQuiz(){
     ensureAudio();
-    if(state.feedbackTimeout){clearTimeout(state.feedbackTimeout);state.feedbackTimeout=null;}
-    state.questions = buildQuestions();
-    state.questionIndex = 0;
+    clearInterval(state.timerInterval);
+    state.currentQuestion = null;
+    state.attempts = 0;
     state.score = 0;
     state.streak = 0;
     state.longestStreak = 0;
@@ -893,18 +1184,33 @@
     state.questionStart = null;
     state.readyForAnswer = false;
     state.locked = false;
+    state.remainingMs = CHALLENGE_DURATION_MS;
+    state.activeSliceStart = null;
+    state.timerInterval = null;
+    state.timerExpired = false;
+    state.flagMissStreak = Object.fromEntries(FLAGS.map(flag=>[flag.name,0]));
+    state.wrongChoiceCounts = Object.fromEntries(FLAGS.map(flag=>[flag.name,0]));
     memeHistory.correct=-1;
     memeHistory.wrong=-1;
     $('scoreValue').textContent='0';
     $('streakValue').textContent='0 🔥';
+    $('quizTimer').textContent='2:00';
+    $('quizTimer').classList.remove('urgent');
+    $('attemptCount').textContent='Attempt 1';
     showScreen(quizScreen);
     renderQuestion();
   }
 
   function renderQuestion(){
+    if(state.timerExpired || state.remainingMs<=0){
+      expireChallenge();
+      return;
+    }
+
     state.readyForAnswer = false;
     state.locked = false;
     state.questionStart = null;
+    state.currentQuestion = buildRandomQuestion();
     gameCard.classList.remove('correct-flash','wrong-flash');
     const feedback = $('feedback');
     feedback.className='feedback-panel';
@@ -913,11 +1219,12 @@
     nextBtn.hidden = true;
     nextBtn.disabled = false;
 
-    const q = state.questions[state.questionIndex];
-    $('questionNumber').textContent = `${state.questionIndex+1} / ${FLAGS.length}`;
+    const q = state.currentQuestion;
+    $('attemptCount').textContent = `Attempt ${state.attempts+1}`;
     $('scoreValue').textContent = state.score.toLocaleString();
     $('streakValue').textContent = `${state.streak} 🔥`;
     $('quizFlag').innerHTML = q.correct.svg;
+    setupHintForCurrentQuestion();
 
     const answers = $('answers');
     answers.innerHTML='';
@@ -932,24 +1239,43 @@
       answers.appendChild(btn);
     });
 
-    // Two animation frames ensure layout/paint is ready before timing begins.
+    // Timing begins only once the new flag and answer buttons have been painted and enabled.
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      if(state.timerExpired || state.remainingMs<=0){
+        expireChallenge();
+        return;
+      }
       [...answers.children].forEach(b=>b.disabled=false);
-      state.questionStart=performance.now();
+      const now=performance.now();
+      state.questionStart=now;
       state.readyForAnswer=true;
+      resumeChallengeTimer();
     }));
   }
 
   function answerQuestion(selectedName, selectedButton){
     if(!state.readyForAnswer || state.locked || state.questionStart===null) return;
-    const elapsed = performance.now() - state.questionStart; // stop timing immediately on selection
+    const now=performance.now();
+    if(getRemainingMs(now)<=0){
+      expireChallenge();
+      return;
+    }
+
+    const elapsed = now - state.questionStart; // stop question timing immediately on selection
+    pauseChallengeTimer(now);                 // feedback time never consumes the 2-minute challenge clock
     state.readyForAnswer=false;
     state.locked=true;
     state.questionStart=null;
+    $('hintBtn').disabled=true;
+    $('hintBtn').hidden=true;
+    $('hintAvailability').hidden=true;
+    $('hintBox').hidden=true;
 
-    const q = state.questions[state.questionIndex];
+    const q = state.currentQuestion;
     const isCorrect = selectedName === q.correct.name;
+    state.attempts++;
     state.responseTimes.push(elapsed);
+    $('attemptCount').textContent=`${state.attempts} answered`;
 
     const allButtons=[...$('answers').children];
     allButtons.forEach(btn=>{
@@ -961,6 +1287,7 @@
     feedback.classList.add('show');
 
     if(isCorrect){
+      state.flagMissStreak[q.correct.name]=0;
       const points=calculatePoints(elapsed);
       state.score += points;
       state.correct++;
@@ -977,24 +1304,24 @@
       playCorrectSound();
       showCorrectCelebration();
       if(state.streak>=3) showHotStreak(state.streak);
-      const nextBtn=$('nextQuestionBtn');
-      nextBtn.textContent=state.questionIndex===FLAGS.length-1?'View Results →':'Next Question →';
-      nextBtn.hidden=false;
     } else {
       state.streak=0;
+      state.flagMissStreak[q.correct.name]=(state.flagMissStreak[q.correct.name]||0)+1;
+      state.wrongChoiceCounts[selectedName]=(state.wrongChoiceCounts[selectedName]||0)+1;
       selectedButton.classList.add('wrong-choice');
       gameCard.classList.remove('correct-flash');
       void gameCard.offsetWidth;
       gameCard.classList.add('wrong-flash');
       feedback.classList.add('bad');
-      const encouragement=ENCOURAGEMENTS[state.questionIndex % ENCOURAGEMENTS.length];
-      feedback.innerHTML=`<div>UNLUCKY — INCORRECT <span class="feedback-sub">Correct answer: <strong>${q.correct.name}</strong> · 0 points</span></div>${responsiveFeedbackMarkup(selectedName,q.correct.name,false)}${memeMarkup(false)}<span class="encouragement">${encouragement.quote} — ${encouragement.by}</span>`;
+      const encouragement=ENCOURAGEMENTS[(state.attempts-1) % ENCOURAGEMENTS.length];
+      feedback.innerHTML=`<div>UNLUCKY — INCORRECT <span class="feedback-sub">Correct answer: <strong>${q.correct.name}</strong> · 0 points</span></div>${responsiveFeedbackMarkup(selectedName,q.correct.name,false,state.wrongChoiceCounts[selectedName])}${memeMarkup(false)}<span class="encouragement">${encouragement.quote} — ${encouragement.by}</span>`;
       $('streakValue').textContent='0 🔥';
       playWrongSound();
-      const nextBtn=$('nextQuestionBtn');
-      nextBtn.textContent=state.questionIndex===FLAGS.length-1?'View Results →':'Next Question →';
-      nextBtn.hidden=false;
     }
+
+    const nextBtn=$('nextQuestionBtn');
+    nextBtn.textContent=state.remainingMs<=0?'View Results →':'Next Question →';
+    nextBtn.hidden=false;
   }
 
   function showHotStreak(n){
@@ -1015,28 +1342,28 @@
   }
 
   function nextQuestion(){
-    state.feedbackTimeout=null;
     const nextBtn=$('nextQuestionBtn');
     nextBtn.hidden=true;
     nextBtn.disabled=true;
-    if(state.questionIndex < FLAGS.length-1){
-      state.questionIndex++;
-      renderQuestion();
-    } else {
+    if(state.timerExpired || state.remainingMs<=0){
       finishGame();
+    } else {
+      renderQuestion();
     }
   }
 
   function finishGame(){
+    pauseChallengeTimer();
     state.readyForAnswer=false;
     state.locked=true;
     const avg=state.responseTimes.length ? state.responseTimes.reduce((a,b)=>a+b,0)/state.responseTimes.length : NaN;
     const fastest=state.correctTimes.length ? Math.min(...state.correctTimes) : NaN;
-    const accuracy=(state.correct/FLAGS.length)*100;
+    const accuracy=state.attempts ? (state.correct/state.attempts)*100 : 0;
 
     $('finalScore').textContent=state.score.toLocaleString();
     $('finalLongest').textContent=state.longestStreak;
-    $('finalCorrect').textContent=`${state.correct} / ${FLAGS.length}`;
+    $('finalAttempts').textContent=state.attempts.toLocaleString();
+    $('finalCorrect').textContent=state.correct.toLocaleString();
     $('finalAccuracy').textContent=`${accuracy.toFixed(0)}%`;
     $('finalAverage').textContent=formatTime(avg);
     $('finalFastest').textContent=formatTime(fastest);
@@ -1044,10 +1371,10 @@
   }
 
   function fullReset(){
-    if(state.feedbackTimeout){clearTimeout(state.feedbackTimeout);state.feedbackTimeout=null;}
+    clearInterval(state.timerInterval);
     state.learnIndex=0;
-    state.questions=[];
-    state.questionIndex=0;
+    state.currentQuestion=null;
+    state.attempts=0;
     state.score=0;
     state.streak=0;
     state.longestStreak=0;
@@ -1057,13 +1384,27 @@
     state.questionStart=null;
     state.readyForAnswer=false;
     state.locked=false;
+    state.remainingMs=CHALLENGE_DURATION_MS;
+    state.activeSliceStart=null;
+    state.timerInterval=null;
+    state.timerExpired=false;
+    state.flagMissStreak=Object.fromEntries(FLAGS.map(flag=>[flag.name,0]));
+    state.wrongChoiceCounts=Object.fromEntries(FLAGS.map(flag=>[flag.name,0]));
     memeHistory.correct=-1;
     memeHistory.wrong=-1;
     $('scoreValue').textContent='0';
     $('streakValue').textContent='0 🔥';
-    $('questionNumber').textContent=`1 / ${FLAGS.length}`;
+    $('quizTimer').textContent='2:00';
+    $('quizTimer').classList.remove('urgent');
+    $('attemptCount').textContent='Attempt 1';
     $('feedback').className='feedback-panel';
     $('feedback').innerHTML='';
+    $('hintBtn').hidden=true;
+    $('hintBtn').disabled=false;
+    $('hintAvailability').hidden=true;
+    $('hintAvailability').textContent='';
+    $('hintBox').hidden=true;
+    $('hintBox').innerHTML='';
     gameCard.classList.remove('correct-flash','wrong-flash');
     $('streakOverlay').classList.remove('show');
     $('streakOverlay').innerHTML='';
@@ -1076,6 +1417,7 @@
 
   $('nextFlagBtn').addEventListener('click',()=>{ensureAudio();nextLearningFlag();});
   $('startQuizBtn').addEventListener('click',startQuiz);
+  $('hintBtn').addEventListener('click',revealHint);
   $('nextQuestionBtn').addEventListener('click',nextQuestion);
   $('playAgainBtn').addEventListener('click',fullReset);
 
@@ -1083,11 +1425,15 @@
   window.FlagGameTest = {
     names:()=>FLAGS.map(f=>f.name),
     calculatePoints,
-    buildQuestions,
+    buildRandomQuestion,
+    getHintLevel,
+    challengeDurationMs:CHALLENGE_DURATION_MS,
     getState:()=>({
-      learnIndex:state.learnIndex, questionIndex:state.questionIndex, score:state.score,
+      learnIndex:state.learnIndex, attempts:state.attempts, score:state.score,
       streak:state.streak, longestStreak:state.longestStreak, correct:state.correct,
-      responseCount:state.responseTimes.length, correctTimeCount:state.correctTimes.length
+      responseCount:state.responseTimes.length, correctTimeCount:state.correctTimes.length,
+      remainingMs:getRemainingMs(), timerExpired:state.timerExpired,
+      flagMissStreak:{...state.flagMissStreak}, wrongChoiceCounts:{...state.wrongChoiceCounts}
     })
   };
 
